@@ -1,0 +1,645 @@
+---
+swagger: "2.0"
+info:
+  description: The API contracts for all functionality of the Family CareSpace application
+  version: 1.0.0
+  title: Family Carespace
+  termsOfService: ""
+  contact:
+    email: support@familycarespace.com
+host: familycarespace-service-dev.cloudapp.net
+basePath: /v1
+tags:
+- name: client
+  description: Clients of the Family Carespace care program
+- name: user
+  description: Operations about user
+- name: sensors
+  description: Sensors assigned to a client
+- name: alerts
+  description: Alerts triggered by sensors pertaining to a client
+- name: location
+  description: Locations of staff and clients displayed on a map
+schemes:
+- https
+- http
+paths:
+  /clients:
+    get:
+      tags:
+      - client
+      summary: Finds clients by parameters
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: firstName
+        in: query
+        description: The first name of the client
+        required: false
+        type: string
+      - name: lastName
+        in: query
+        description: The last name of the client
+        required: false
+        type: string
+      - name: street
+        in: query
+        description: The street where the client is located
+        required: false
+        type: string
+      - name: city
+        in: query
+        description: The city where the client is located
+        required: false
+        type: string
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Client'
+      security:
+      - fsc_auth:
+        - read:clients
+    post:
+      tags:
+      - client
+      summary: Add a new client
+      description: ""
+      operationId: addClient
+      consumes:
+      - application/json
+      - application/xml
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Client object that needs to be added to the system
+        required: true
+        schema:
+          $ref: '#/definitions/Client'
+      responses:
+        "405":
+          description: Invalid input
+      security:
+      - fsc_auth:
+        - write:clients
+        - read:clients
+    put:
+      tags:
+      - client
+      summary: Update an existing client
+      description: ""
+      operationId: updateClient
+      consumes:
+      - application/json
+      - application/xml
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Client object that needs to be updated
+        required: true
+        schema:
+          $ref: '#/definitions/Client'
+      responses:
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Client not found
+        "405":
+          description: Validation exception
+      security:
+      - fsc_auth:
+        - write:clients
+        - read:clients
+  /clients/{clientId}/images:
+    post:
+      tags:
+      - client
+      summary: uploads an image
+      description: ""
+      operationId: uploadFile
+      consumes:
+      - multipart/form-data
+      produces:
+      - application/json
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client to update
+        required: true
+        type: integer
+        format: int64
+      - name: additionalMetadata
+        in: formData
+        description: Additional data to pass to server
+        required: false
+        type: string
+      - name: file
+        in: formData
+        description: file to upload
+        required: false
+        type: file
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponse'
+      security:
+      - fsc_auth:
+        - write:clients
+        - read:clients
+  /clients/{clientId}/sensors:
+    get:
+      tags:
+      - sensors
+      summary: Finds sensors by clientId
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: clientId
+        in: path
+        description: Unique Id of a client
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Sensor'
+      security:
+      - fsc_auth:
+        - read:clients
+    post:
+      tags:
+      - sensors
+      summary: Assign new sensor to a client
+      description: ""
+      operationId: addClientSensor
+      consumes:
+      - application/json
+      - application/xml
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client to update
+        required: true
+        type: integer
+        format: int64
+      - in: body
+        name: body
+        description: Sensor object that needs to be added to the system
+        required: true
+        schema:
+          $ref: '#/definitions/Sensor'
+      responses:
+        "405":
+          description: Invalid input
+      security:
+      - fsc_auth:
+        - write:clients
+        - read:clients
+    put:
+      tags:
+      - sensors
+      summary: Update an existing client sensor relation
+      description: ""
+      operationId: updateClientSensor
+      consumes:
+      - application/json
+      - application/xml
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client to update
+        required: true
+        type: integer
+        format: int64
+      - in: body
+        name: body
+        description: Sensor object that needs to be updated
+        required: true
+        schema:
+          $ref: '#/definitions/Sensor'
+      responses:
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Client not found
+        "405":
+          description: Validation exception
+      security:
+      - fsc_auth:
+        - write:clients
+        - read:clients
+  /alerts:
+    get:
+      tags:
+      - alerts
+      summary: Finds alerts by parameters
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: clientId
+        in: query
+        description: The id of a client
+        required: false
+        type: integer
+      - name: sensorId
+        in: query
+        description: The id of a sensor
+        required: false
+        type: integer
+      - name: alertId
+        in: query
+        description: The id of an alert
+        required: false
+        type: integer
+      - name: staffId
+        in: query
+        description: The id of a staff member
+        required: false
+        type: integer
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Alert'
+      security:
+      - fsc_auth:
+        - read:clients
+  /alerts/{alertId}:
+    put:
+      tags:
+      - alerts
+      summary: updates status or assigned staff of an alert
+      description: ""
+      operationId: updateAlert
+      consumes:
+      - application/json
+      - application/xml
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: alertId
+        in: path
+        description: ID of alert to update
+        required: true
+        type: integer
+        format: int64
+      - in: body
+        name: body
+        description: Alert object that needs updated
+        required: true
+        schema:
+          $ref: '#/definitions/Alert'
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Alert not found
+        "405":
+          description: Validation exception
+      security:
+      - fsc_auth:
+        - write:clients
+        - read:clients
+  /alerts/{alertId}/comments:
+    get:
+      tags:
+      - alerts
+      summary: Finds comments related to an alert by alertId
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: alertId
+        in: path
+        description: Unique Id of an alert
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Comment'
+      security:
+      - fsc_auth:
+        - read:clients
+    put:
+      tags:
+      - alerts
+      summary: Update comments related to an alert
+      description: ""
+      operationId: updateAlertComment
+      consumes:
+      - multipart/form-data
+      produces:
+      - application/json
+      parameters:
+      - name: alertId
+        in: path
+        description: ID of alert to update
+        required: true
+        type: integer
+        format: int64
+      - name: additionalMetadata
+        in: formData
+        description: Additional data to pass to server
+        required: false
+        type: string
+      responses:
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Alert not found
+        "405":
+          description: Validation exception
+      security:
+      - fsc_auth:
+        - write:clients
+        - read:clients
+  /location:
+    get:
+      tags:
+      - location
+      summary: Get locations of client and staff by parameters
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - name: username
+        in: query
+        description: The full name of the user
+        required: false
+        type: string
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Location'
+      security:
+      - fsc_auth:
+        - read:clients
+securityDefinitions:
+  fsc_auth:
+    type: oauth2
+    authorizationUrl: http://petstore.swagger.io/oauth/dialog
+    flow: implicit
+    scopes:
+      write:clients: modify client data
+      read:clients: read client data
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  Phone:
+    type: object
+    properties:
+      type:
+        type: string
+        description: The type of phone number
+        enum:
+        - Home
+        - Work
+        - Mobile
+      number:
+        type: string
+        example: (617) 555-1212
+        description: The phone number
+    xml:
+      name: phoneNumber
+  Address:
+    type: object
+    properties:
+      street1:
+        type: string
+        example: 1 Main Street
+      street2:
+        type: string
+        example: ""
+      city:
+        type: string
+        example: Boston
+      state:
+        type: string
+        example: MA
+      postalCode:
+        type: string
+        example: "02101"
+  Client:
+    type: object
+    required:
+    - firstName
+    - lastName
+    properties:
+      id:
+        type: integer
+        format: int64
+      title:
+        type: string
+        enum:
+        - Mr
+        - Mstr
+        - Miss
+        - Mrs
+        - Ms
+        - Dr
+        - Sir
+        - Sister
+        - Rev
+        - Professor
+      firstName:
+        type: string
+        example: John
+      lastName:
+        type: string
+        example: Doe
+      gender:
+        type: string
+        enum:
+        - Male
+        - Female
+        - Transgender
+        - Non Binary
+        - Other
+      dateOfBirth:
+        type: string
+        format: date
+      address:
+        $ref: '#/definitions/Address'
+      emailAddress:
+        type: string
+        example: john.doe@some-email-service.com
+      phoneNumbers:
+        type: array
+        xml:
+          name: phoneNumbers
+          wrapped: true
+        items:
+          $ref: '#/definitions/Phone'
+      imageUrl:
+        type: string
+        example: http://some-server/some-image.jpg
+  Sensor:
+    type: object
+    required:
+    - clientId
+    - location
+    - sensorId
+    properties:
+      clientId:
+        type: integer
+        format: int64
+      sensorId:
+        type: integer
+        format: int64
+      type:
+        type: string
+        enum:
+        - contact
+        - motion
+        - gateway
+      location:
+        type: string
+        example: living room
+      status:
+        type: boolean
+      today_trigger_count:
+        type: integer
+        format: int64
+      last_trigger_time:
+        type: string
+        format: datetime
+      avg_trigger_count:
+        type: integer
+        format: int64
+      avg_trigger_duration:
+        type: number
+        format: float
+      imageUrl:
+        type: string
+        example: http://some-server/some-image.jpg
+  Alert:
+    type: object
+    required:
+    - sensorId
+    properties:
+      clientId:
+        type: integer
+        format: int64
+      sensorId:
+        type: integer
+        format: int64
+      staffId:
+        type: integer
+        format: int64
+      cause:
+        type: string
+        enum:
+        - cause1
+        - cause2
+        - cause3
+      status:
+        type: boolean
+      trigger_time:
+        type: string
+        format: datetime
+      resolution_time:
+        type: string
+        format: datetime
+  Comment:
+    type: object
+    required:
+    - alertId
+    properties:
+      alertId:
+        type: integer
+        format: int64
+      userId:
+        type: integer
+        format: int64
+      comment_time:
+        type: string
+        format: datetime
+      content:
+        type: string
+        example: alert was resolved
+  Location:
+    type: object
+    required:
+    - userId
+    properties:
+      userId:
+        type: integer
+        format: int64
+      username:
+        type: string
+        example: John Doe
+      lat:
+        type: number
+        format: float
+      lng:
+        type: number
+        format: float
+      role:
+        type: string
+        enum:
+        - client
+        - staff
+      status:
+        type: string
+        enum:
+        - alert
+        - ok
+        - not available
+        - available
+        - on duty
+      assgined:
+        type: string
+        example: John Doe
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      message:
+        type: string
+  Model:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
