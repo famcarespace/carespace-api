@@ -449,7 +449,7 @@ paths:
         - read:clients
     put:
       tags:
-      - task
+      - tasks
       summary: Update an existing task
       description: ""
       operationId: updateTask
